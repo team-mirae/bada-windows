@@ -16,6 +16,20 @@ unload test **haven't been compiled** (mingw-w64's TSF headers lack `ITfTextInpu
 `ITfMenu` and the language bar interfaces) and nothing has run on Windows yet: start at "First run
 on Windows" below.
 
+First Windows build (2026-11-11, Windows 11 Pro 26200, VS 2022 Build Tools, CMake 4.4, Rust 1.99.1):
+everything compiles with MSVC for x64 and x86 with no warnings at `/W4`, the text service and the
+testpad included. The core tests pass, 241 checks on both (the 242nd is macOS-only: the `.dylib`
+name). `bw_unloadtest` passes on both without installing: 8 rounds, private memory flat at 2 MB.
+Then installed on the owner's PC (`tools/install.ps1`: registered x64 + x86, added under 日本語) and
+`tools/type-test.ps1` run: 16 of 54 failed at first; after the fixes in
+[tsf-notes.md](tsf-notes.md#first-type-test-2026-11-11), **53 of 54 pass** (the one left: a Unicode-injected
+character reaches a classic Edit before the commit; it can't be sent again). Not run yet: `bw_state --watch` by hand and
+the **[measure]** items.
+
+A development build that logs every key (virtual key, scan code, mode before and after, eaten) to the
+diagnostic log: configure with `-DCMAKE_CXX_FLAGS="/DWIN32 /D_WINDOWS /GR /EHsc /DBW_KEY_LOG"` in a
+build folder of its own. It logs keystrokes: never ship it, and turn the log off after.
+
 ## Toolchain (Windows 10 or 11)
 
 | Tool | For | Install |

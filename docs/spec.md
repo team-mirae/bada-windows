@@ -185,7 +185,9 @@ becomes the composition, underlined (thick when the menu shows an entry other th
   their rows; `japanese` rows are drawn in Yu Gothic UI; `horizontal` menus are one row of cells.
   The contract has no "pick a row": clicks do nothing.
 - Everything jis-moonshot measured about TSF stays (docs/tsf-notes.md): the engine runs in
-  `OnTestKeyDown`; keys not consumed are committed and reported as not eaten; a key-down tested twice
+  `OnTestKeyDown`; keys not consumed are committed and reported as not eaten (but through the IMM
+  layer, a key without modifiers that ends a composition is eaten and sent again after the commit:
+  a ja-JP profile's commit would reach the app after it, docs/tsf-notes.md); a key-down tested twice
   runs once; apps through the IMM layer get an interim selection; text an app refuses to compose
   stays as plain text and is replaced at the next key; edit sessions hold the service and never call
   the engine; focus changes commit what's staged.

@@ -62,7 +62,8 @@ int wmain(int argc, wchar_t** argv) {
     GetModuleFileNameW(nullptr, self, MAX_PATH);
     std::wstring path = self;
     path = path.substr(0, path.find_last_of(L'\\') + 1) + L"bada_windows.dll";
-    if (argc < 2 || FAILED(CLSIDFromString(argv[1], &kClsid))) {
+    // IIDFromString only parses: CLSIDFromString also looks the class up and fails before install.
+    if (argc < 2 || FAILED(IIDFromString(argv[1], &kClsid))) {
         std::printf("usage: bw_unloadtest {CLSID} [dll] [rounds]\n");
         return 2;
     }

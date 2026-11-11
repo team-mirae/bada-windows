@@ -106,6 +106,8 @@ private:
     // The engine's Output, applied to the document (bada-compatible §7.1).
     void ApplyOutput(ITfContext* context, const Output& out);
     std::string ReadSelection(ITfContext* context);
+    static constexpr size_t kSelectionLimit = 4096;  // a longer selection is taken in part
+    static std::wstring ControlSelection(size_t limit);  // a classic Edit or RichEdit's, via messages
     void ShowList();
 
     // The session's mode and profile (a global compartment), and the open/close mirror.
@@ -167,6 +169,10 @@ private:
     std::optional<unsigned long> applied_version_;
     int ignore_caps_ = 0;  // our own injected Caps Lock presses, to let through
     ULONGLONG caps_injected_tick_ = 0;
+    // A key sent again after its commit (IMM layer, Process): let through when it comes back.
+    unsigned resent_vk_ = 0;
+    ULONGLONG resent_tick_ = 0;
+    void SendAgain(const KeyDown& key);
     state::Slot* slot_ = nullptr;
     LPARAM notified_ = -1;  // what the last state message said
 };
