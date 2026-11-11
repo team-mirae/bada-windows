@@ -2,6 +2,7 @@
 #include "text_service.h"
 
 #include <InputScope.h>
+#include <richedit.h>
 
 #include <cwchar>
 #include <iterator>
@@ -48,6 +49,12 @@ enum MenuId : UINT {
 };
 
 bool Down(int vk) { return (GetKeyState(vk) & 0x8000) != 0; }
+
+// A context the IMM compatibility layer made for a classic control.
+bool Transitory(ITfContext* context) {
+    TF_STATUS status = {};
+    return context && SUCCEEDED(context->GetStatus(&status)) && (status.dwStaticFlags & TF_SS_TRANSITORY) != 0;
+}
 
 Mods Modifiers() {
     Mods m;
@@ -343,12 +350,13 @@ bool TextService::PrivateField(ITfContext* context) {
         }
     }
     // A password or PIN by its input scope (browsers' password inputs, XAML PasswordBox...).
+    // It's an app property (GetAppProperty): GetProperty fails for it (measured 2026-11-11).
     bool secret = false;
     RunReadSessionNow(context, client_id_, [&](TfEditCookie ec) -> HRESULT {
-        ComPtr<ITfProperty> property;
+        ComPtr<ITfReadOnlyProperty> property;
         TF_SELECTION selection = {};
         ULONG fetched = 0;
-        if (FAILED(context->GetProperty(kPropInputScope, &property)) ||
+        if (FAILED(context->GetAppProperty(kPropInputScope, &property)) || !property ||
             FAILED(context->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &selection, &fetched)) || !fetched ||
             !selection.range) {
             return S_OK;
@@ -411,6 +419,11 @@ bool TextService::Process(ITfContext* context, WPARAM wparam, LPARAM lparam) {
         ignore_caps_ = 0;
     }
     const LangKey lang = LangKeyOf(k);
+    // The Japanese layout's state keys (VK_DBE_ALPHANUMERIC, _KATAKANA, _HIRAGANA: 英数 and カタカナ)
+    // never come back released (measured 2026-11-11, injected: the only key-up is a synthesized one
+    // of the previous state key, before the press), so every press after the first says "already
+    // down". Each press counts. [measure] whether a physical key held down repeats.
+    if (k.vk == vk::kDbeAlphanumeric || k.vk == vk::kDbeKatakana || k.vk == vk::kDbeHiragana) k.repeat = false;
     const std::string code = CodeOf(k);
     if (lang == LangKey::kNone && code.empty()) return false;  // a modifier on its own
     if (!Target(context) && lang == LangKey::kNone) {
@@ -424,8 +437,27 @@ bool TextService::Process(ITfContext* context, WPARAM wparam, LPARAM lparam) {
     TsfField field(this, Target(context));
     // A password field or a program the IME is off in: nothing composes there (the language keys
     // still switch mode, for the next field).
-    const bool eaten = (private_ || app_off_) && lang == LangKey::kNone ? host_->TypeOnly(k, field)
-                                                                         : host_->Key(k, field);
+#ifdef BW_KEY_LOG  // a development build's per-key line (docs/testing.md): never in a release, it logs keys
+    const int mode_before = static_cast<int>(host_->mode());
+#endif
+    const bool had_text = Composing() || orphan_.Get() != nullptr;
+    bool eaten = (private_ || app_off_) && lang == LangKey::kNone ? host_->TypeOnly(k, field)
+                                                                   : host_->Key(k, field);
+    // A key that commits and then reaches the app. Through the IMM layer a Japanese profile's commit
+    // reaches the app after that key (measured 2026-11-11: Space typed " H" for "H "; a ko-KR profile
+    // keeps the order), so the key is eaten and sent again, to arrive after the commit. Only keys
+    // without modifiers: sending a shortcut again would fake modifiers the user may have let go of.
+    // VK_PACKET can't be sent again (its lParam doesn't carry the character).
+    if (!eaten && had_text && lang == LangKey::kNone && k.vk != VK_PACKET && !k.mods.shift && k.mods.Plain() &&
+        Transitory(Target(context))) {
+        SendAgain(k);
+        eaten = true;
+    }
+#ifdef BW_KEY_LOG
+    log::Write(L"KEY vk=%02X scan=%02X ext=%d rep=%d sh=%d caps=%d lang=%d code=%S mode %d->%d eaten=%d composing=%d private=%d ctx=%d",
+               k.vk, k.scan, k.extended, k.repeat, k.mods.shift, k.caps, static_cast<int>(lang), code.c_str(),
+               mode_before, static_cast<int>(host_->mode()), eaten, Composing(), private_, context != nullptr);
+#endif
     AfterHost();
     return eaten;
 }
@@ -455,6 +487,16 @@ STDMETHODIMP TextService::OnTestKeyDown(ITfContext* context, WPARAM wparam, LPAR
     // already ran for it (jis-moonshot #5).
     const LONG time = GetMessageTime();
     const ULONGLONG tick = GetTickCount64();
+    // A key we sent again after its commit (Process), coming back: the app's. Before the check
+    // below, which would take it for the original (same lParam) while that is still held.
+    if (resent_vk_ && vk == resent_vk_) {
+        resent_vk_ = 0;
+        if (tick - resent_tick_ < kCapsEcho) {
+            tested_ = {wparam, lparam, time, tick, FALSE, true, true};
+            if (vk < eaten_down_.size()) eaten_down_[vk] = false;
+            return S_OK;
+        }
+    }
     if (tested_.valid &&
         SameKeyDown(tested_.wparam, tested_.lparam, tested_.time, tested_.tick, wparam, lparam, time, tick)) {
         *eaten = tested_.eaten;
@@ -505,6 +547,21 @@ STDMETHODIMP TextService::OnPreservedKey(ITfContext*, REFGUID, BOOL* eaten) {
     return S_OK;
 }
 
+void TextService::SendAgain(const KeyDown& key) {
+    INPUT in[2] = {};
+    in[0].type = in[1].type = INPUT_KEYBOARD;
+    in[0].ki.wVk = in[1].ki.wVk = static_cast<WORD>(key.vk);
+    in[0].ki.wScan = in[1].ki.wScan = static_cast<WORD>(key.scan);
+    in[0].ki.dwFlags = key.extended ? KEYEVENTF_EXTENDEDKEY : 0;
+    in[1].ki.dwFlags = in[0].ki.dwFlags | KEYEVENTF_KEYUP;
+    resent_vk_ = key.vk;
+    resent_tick_ = GetTickCount64();
+    if (SendInput(2, in, sizeof(INPUT)) != 2) {
+        resent_vk_ = 0;
+        log::Write(L"sending a key again after its commit: SendInput failed (%lu)", GetLastError());
+    }
+}
+
 void TextService::SetCapsLock(bool on) {
     if (((GetKeyState(VK_CAPITAL) & 1) != 0) == on) return;
     // Windows' lock state is set by a key press only: one injected press (FKeyIME's SetCapsLock),
@@ -548,17 +605,52 @@ std::string TextService::ReadSelection(ITfContext* context) {
             !selection.range) {
             return S_OK;
         }
-        constexpr ULONG kLimit = 4096;  // a selection longer than this is taken in part
         WCHAR buffer[256];
         ULONG got = 0;
-        while (text.size() < kLimit &&
+        while (text.size() < kSelectionLimit &&
                SUCCEEDED(selection.range->GetText(ec, TF_TF_MOVESTART, buffer, ARRAYSIZE(buffer), &got)) && got) {
             text.append(buffer, got);
         }
         selection.range->Release();
         return S_OK;
     });
+    // Classic Edit and RichEdit controls reached through the IMM layer: the transitory context holds
+    // only the composition, never the app's text (measured 2026-11-11: 0 characters selected). Ask
+    // the control itself; the text service runs in its process.
+    if (text.empty()) text = ControlSelection(kSelectionLimit);
     return Utf8(text);
+}
+
+std::wstring TextService::ControlSelection(size_t limit) {
+    HWND focus = GetFocus();
+    if (!focus) return {};
+    wchar_t name[64] = L"";
+    GetClassNameW(focus, name, 64);
+    for (wchar_t& c : name) c = static_cast<wchar_t>(towlower(c));
+    if (!wcsstr(name, L"edit")) return {};
+    // Never a password control's text, whatever called this.
+    if ((GetWindowLongW(focus, GWL_STYLE) & ES_PASSWORD) || SendMessageW(focus, EM_GETPASSWORDCHAR, 0, 0) != 0) {
+        return {};
+    }
+    DWORD start = 0, end = 0;
+    SendMessageW(focus, EM_GETSEL, reinterpret_cast<WPARAM>(&start), reinterpret_cast<LPARAM>(&end));
+    if (end <= start) return {};
+    std::wstring text;
+    if (wcsstr(name, L"richedit")) {
+        // RichEdit counts a new line as one character; EM_GETSELTEXT gives the text as it counts it.
+        text.resize(static_cast<size_t>(end - start) + 1);
+        const LRESULT got = SendMessageW(focus, EM_GETSELTEXT, 0, reinterpret_cast<LPARAM>(text.data()));
+        text.resize(got > 0 ? static_cast<size_t>(got) : 0);
+    } else {
+        const LRESULT length = SendMessageW(focus, WM_GETTEXTLENGTH, 0, 0);
+        if (length <= 0 || static_cast<DWORD>(length) < end) return {};
+        std::wstring all(static_cast<size_t>(length) + 1, L'\0');
+        const LRESULT got = SendMessageW(focus, WM_GETTEXT, all.size(), reinterpret_cast<LPARAM>(all.data()));
+        if (got < static_cast<LRESULT>(end)) return {};
+        text = all.substr(start, end - start);
+    }
+    if (text.size() > limit) text.resize(limit);
+    return text;
 }
 
 void TextService::ShowList() {
@@ -647,9 +739,11 @@ STDMETHODIMP TextService::OnChange(REFGUID guid) {
     const Product* product = GetProduct();
     if (product && IsEqualGUID(guid, product->clsid)) {
         // Another thread or app switched mode or profile: follow it, committing what's staged.
-        Mode mode = mode_;
+        // Cleared (0, as bw_testpad does): back to the manifest's mode.
+        Mode mode = product->manifest.mode == "muhenkan" ? Mode::kMuhenkan : Mode::kHenkan;
         std::string profile = profile_;
-        if (!ReadSession(&mode, &profile) || (mode == mode_ && profile == profile_)) return S_OK;
+        ReadSession(&mode, &profile);
+        if (mode == mode_ && profile == profile_) return S_OK;
         mode_ = mode;
         profile_ = profile;
         if (host_) {

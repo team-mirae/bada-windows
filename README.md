@@ -11,9 +11,11 @@ The example IME is **shout**, bada-compatible's template IME: henkan mode types 
 offer lowercase, 半角/全角 in muhenkan shouts the selection.
 
 > [!WARNING]
-> **Not run on Windows yet.** Written and unit-tested on macOS (the portable core: 242 checks against
-> the real shout engine); the TSF shell is a port of jis-moonshot's measured one but hasn't been
-> compiled. Start at [docs/testing.md](docs/testing.md#first-run-on-windows).
+> **Early on Windows.** It builds with MSVC for x64 and x86, the core tests pass against the real
+> shout engine (241 checks on Windows, 242 on macOS), and the unload test passes. Typed through the
+> installed TIP, 53 of 54 cases pass ([docs/tsf-notes.md](docs/tsf-notes.md#first-type-test-2026-11-11));
+> not yet measured by hand on a JIS keyboard.
+> Start at [docs/testing.md](docs/testing.md#first-run-on-windows).
 
 ## How it differs from bada ime on macOS
 
