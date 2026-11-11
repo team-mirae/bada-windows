@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/lang_bar.* (MIT, NOTICE.md).
+// Adapted from team-mirae/jis-moonshot windows/src/lang_bar.*.
 #include "lang_bar.h"
 
 #include <olectl.h>

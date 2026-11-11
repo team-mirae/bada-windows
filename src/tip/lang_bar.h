@@ -1,7 +1,7 @@
 // The button in the input indicator (the taskbar, where the Microsoft IMEs show あ / A): the mode's
 // label from the manifest. A click switches mode; right-click opens the settings menu, a popup the
 // IME shows itself (the Windows 8+ indicator only reports the click).
-// Adapted from team-mirae/jis-moonshot windows/src/lang_bar.* (MIT).
+// Adapted from team-mirae/jis-moonshot windows/src/lang_bar.*.
 #pragma once
 
 #include <msctf.h>

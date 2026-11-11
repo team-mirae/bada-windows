@@ -1,5 +1,5 @@
 // The TSF text input processor (an in-proc COM server): DLL exports and the class factory.
-// Adapted from team-mirae/jis-moonshot windows/src/dllmain.cpp (MIT).
+// Adapted from team-mirae/jis-moonshot windows/src/dllmain.cpp.
 #include <windows.h>
 
 #include <new>

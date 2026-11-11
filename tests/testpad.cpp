@@ -1,6 +1,6 @@
 // bw_testpad: a classic Edit control, a RichEdit through the IMM compatibility layer (its default)
 // and a RichEdit using TSF directly (SES_USECTF), for typing through the installed TIP.
-// Adapted from team-mirae/jis-moonshot windows/tests/testpad.cpp (MIT).
+// Adapted from team-mirae/jis-moonshot windows/tests/testpad.cpp.
 //
 //   bw_testpad                                         a window to type in by hand
 //   bw_testpad --clsid {…} --profile {…} --lang 0x0411

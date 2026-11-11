@@ -64,5 +64,5 @@ one, or `BADA_COMPATIBLE=…`).
 
 ## License
 
-[CC0 1.0](LICENSE) where it permits: see [NOTICE.md](NOTICE.md) for the files adapted from
-jis-moonshot (MIT) and FKeyIME (BSD-3-Clause). Engines keep their own licenses.
+[CC0 1.0](LICENSE), all of it, the parts adapted from jis-moonshot and FKeyIME included (their
+authors' dedication). Engines keep their own licenses.

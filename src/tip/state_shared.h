@@ -1,4 +1,4 @@
-// Follows themrsung/fkeyime's state table and API (BSD-3-Clause, NOTICE.md).
+// Follows themrsung/fkeyime's state table and API.
 // The session's state table (src/core/state_table.h) in shared memory, and the notification message.
 #pragma once
 

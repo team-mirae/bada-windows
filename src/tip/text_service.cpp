@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/text_service.* (MIT, NOTICE.md).
+// Adapted from team-mirae/jis-moonshot windows/src/text_service.*.
 #include "text_service.h"
 
 #include <InputScope.h>

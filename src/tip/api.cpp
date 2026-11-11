@@ -1,4 +1,4 @@
-// Follows themrsung/fkeyime's state table and API (BSD-3-Clause, NOTICE.md).
+// Follows themrsung/fkeyime's state table and API.
 // The public API (include/bada_windows_api.h, docs/api.md): read-only queries of the state table.
 #include "bada_windows_api.h"
 

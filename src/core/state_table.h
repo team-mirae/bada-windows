@@ -1,4 +1,4 @@
-// Follows themrsung/fkeyime's state table and API (BSD-3-Clause, NOTICE.md).
+// Follows themrsung/fkeyime's state table and API.
 // The state other programs read (docs/api.md): a table in session-wide shared memory with one slot
 // per thread where the IME is active, holding its published state (bada-compatible v1.1 §12.1: the
 // engine's P_state with the host's fields under "host"). Writers are the text services (one per

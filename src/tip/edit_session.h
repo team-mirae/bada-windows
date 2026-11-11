@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/edit_session.* (MIT).
+// Adapted from team-mirae/jis-moonshot windows/src/edit_session.*.
 // TSF edit sessions: the only way a TIP may change the document.
 #pragma once
 

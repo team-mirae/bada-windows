@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/edit_session.* (MIT, NOTICE.md).
+// Adapted from team-mirae/jis-moonshot windows/src/edit_session.*.
 #include "edit_session.h"
 
 #include <wrl/client.h>

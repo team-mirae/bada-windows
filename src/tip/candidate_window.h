@@ -1,6 +1,6 @@
 // The engine's menu (bada-compatible §6: menu, selected, zero, horizontal, notes, japanese), drawn
 // under the text. A topmost popup that never takes focus, excluded from screen capture.
-// Adapted from team-mirae/jis-moonshot windows/src/candidate_window.* (MIT).
+// Adapted from team-mirae/jis-moonshot windows/src/candidate_window.*.
 #pragma once
 
 #include <windows.h>

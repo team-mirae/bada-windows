@@ -380,10 +380,10 @@ void TestManifest() {
     const fs::path dir = fs::temp_directory_path() / "bw-core-tests";
     fs::remove_all(dir);
     fs::create_directories(dir / "brands");
-    std::ofstream(dir / "a.txt") << "alpha";
-    std::ofstream(dir / "brands" / "2.tsv") << "two\n";
-    std::ofstream(dir / "brands" / "1.tsv") << "one";
-    std::ofstream(dir / "brands" / "skip.txt") << "no";
+    std::ofstream(dir / "a.txt", std::ios::binary) << "alpha";
+    std::ofstream(dir / "brands" / "2.tsv", std::ios::binary) << "two\n";
+    std::ofstream(dir / "brands" / "1.tsv", std::ios::binary) << "one";
+    std::ofstream(dir / "brands" / "skip.txt", std::ios::binary) << "no";
     auto d = ParseManifest(std::string(R"({"name": "x", "library": "x", "prefix": "x",
         "data": ["a.txt", null, {"file": "a.txt"}, {"concat": ["a.txt", {"text": "#! b\n"}, {"dir": "brands", "suffix": ".tsv"}]}], )") +
                                kWindows + "}",

@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/candidate_window.* (MIT, NOTICE.md).
+// Adapted from team-mirae/jis-moonshot windows/src/candidate_window.*.
 #include "candidate_window.h"
 
 #include <algorithm>

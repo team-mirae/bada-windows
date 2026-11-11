@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/registration.cpp (MIT).
+// Adapted from team-mirae/jis-moonshot windows/src/registration.cpp.
 #include "registration.h"
 
 #include <msctf.h>

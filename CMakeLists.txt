@@ -14,6 +14,7 @@ if(MSVC)
     # The static CRT: the DLL loads into every app and can't count on a VC++ runtime.
     set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
     add_compile_options(/W4 /utf-8 /permissive- /EHsc)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 else()
     add_compile_options(-Wall -Wextra)
 endif()

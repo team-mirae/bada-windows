@@ -5,7 +5,7 @@
 #   tools/type-test.ps1                  all cases, every control
 #   tools/type-test.ps1 -Target tsf     one control
 #   tools/type-test.ps1 -Filter caps    cases whose name has "caps"
-# Adapted from team-mirae/jis-moonshot windows/tools/type-test.ps1 (MIT).
+# Adapted from team-mirae/jis-moonshot windows/tools/type-test.ps1.
 param(
     [ValidateSet('edit', 'rich', 'tsf')] [string[]] $Target = @('edit', 'rich', 'tsf'),
     [string] $Filter = '',

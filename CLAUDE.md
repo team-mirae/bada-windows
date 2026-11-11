@@ -11,8 +11,8 @@
   work. Mark facts measured / inherited / **[measure]**; don't implement **[decide]** items silently.
 - GUIDs in manifests (`windows.clsid`, `windows.profile`) and in `src/tip/guids.h` are permanent.
 - Names: bada (lowercase); muhenkan / henkan mode; bada-windows.
-- License: CC0 where it permits; files adapted from jis-moonshot (MIT) or FKeyIME (BSD-3) say so in
-  their header and are listed in `NOTICE.md`.
+- License: CC0, all of it, code adapted from jis-moonshot or FKeyIME included (credited in file
+  headers).
 - Ask before registering the TIP or changing language settings on a real PC; test in Windows Sandbox
   (`tools/sandbox/`) or a VM first.
 

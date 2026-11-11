@@ -7,7 +7,7 @@
 // service's own state, shared by every app in the session (a TSF global compartment), mirrored in
 // the open/close compartment for the input indicator.
 //
-// Adapted from team-mirae/jis-moonshot windows/src/text_service.* (MIT): the key handling, the
+// Adapted from team-mirae/jis-moonshot windows/src/text_service.*: the key handling, the
 // composition and the edit sessions keep the measured fixes of its docs/troubleshooting/
 // windows-tsf-notes.md (see docs/tsf-notes.md here).
 #pragma once

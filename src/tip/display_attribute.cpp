@@ -1,4 +1,4 @@
-// Adapted from team-mirae/jis-moonshot windows/src/display_attribute.* (MIT, NOTICE.md).
+// Adapted from team-mirae/jis-moonshot windows/src/display_attribute.*.
 #include "display_attribute.h"
 
 #include <new>

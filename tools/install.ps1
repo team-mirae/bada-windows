@@ -8,7 +8,7 @@
 #   tools/install.ps1 -Uninstall       undo all of it
 #   tools/install.ps1 -Log             turn the diagnostic log on and follow it
 # Apps that were running keep the old DLL (or none) until they restart (FKeyIME
-# docs/issues/apps-dont-load-fkeyime.md). Adapted from team-mirae/jis-moonshot windows/tools/install.ps1 (MIT).
+# docs/issues/apps-dont-load-fkeyime.md). Adapted from team-mirae/jis-moonshot windows/tools/install.ps1.
 param(
     [string] $Name = 'shout',
     [switch] $Uninstall,

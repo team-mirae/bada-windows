@@ -1,7 +1,7 @@
 // bw_unloadtest: loads bada_windows.dll, activates the text service on this thread (which preloads
 // the engine and its data on the thread pool), deactivates and releases it, and unloads the DLL
 // (DllCanUnloadNow frees the engine), again and again. Adapted from team-mirae/jis-moonshot
-// windows/tests/unload.cpp (MIT). The process's private memory must not grow with each round (DLL_PROCESS_DETACH frees the
+// windows/tests/unload.cpp. The process's private memory must not grow with each round (DLL_PROCESS_DETACH frees the
 // shared data), and nothing may crash while the preload runs during the unload.
 //
 //   bw_unloadtest {CLSID} [path\to\bada_windows.dll] [rounds]

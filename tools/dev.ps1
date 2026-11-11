@@ -1,6 +1,6 @@
 ﻿# Runs a command inside a Visual Studio developer environment for one architecture.
 #   tools/dev.ps1 -Arch x64 -Command 'cmake --preset x64'
-# Adapted from team-mirae/jis-moonshot windows/tools/dev.ps1 (MIT).
+# Adapted from team-mirae/jis-moonshot windows/tools/dev.ps1.
 param(
     [ValidateSet('x64', 'x86')] [string] $Arch = 'x64',
     [Parameter(Mandatory)] [string] $Command
